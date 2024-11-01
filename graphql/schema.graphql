@@ -1,0 +1,38 @@
+type User {
+    id: ID!
+    name: String!
+    email: String!
+    created_at: DateTime!
+    updated_at: DateTime!
+    account: Account @field(resolver: "App\\GraphQL\\Resolvers\\UserResolver@resolveAccount")
+}
+type UserAuth {
+    id: ID!
+    name: String
+    token: String 
+}
+type Customer {
+  id: ID!
+  name: String!
+  email: String!
+}
+type DeliveryAgent {
+  id: ID!
+  name: String!
+  email: String!
+}
+union Account = Customer | DeliveryAgent
+
+type Query {
+  users: [User!]! @field(resolver: "App\\GraphQL\\Queries\\UserQuery@allUsers") @guard(with: ["sanctum"])
+  user(id: ID!): User @field(resolver: "App\\GraphQL\\Queries\\UserQuery@singleUser") @guard(with: ["sanctum"])
+}
+
+type Mutation {
+    createUser(name: String!, email: String!, password: String!): User @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@createUser") @guard(with: ["sanctum"])
+
+    updateUser(id: ID!, name: String, email: String, password: String): User @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@updateUser") @guard(with: ["sanctum"])
+    deleteUser(id: ID!): Boolean @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@deleteUser") @guard(with: ["sanctum"])
+    login(email: String!, password: String!): UserAuth  @field(resolver: "App\\GraphQL\\Mutations\\LoginMutation")
+    #logout: User @field(resolver: "App\\GraphQL\\Mutations\\LogoutResolver@__invoke" guard: "custom")
+}
